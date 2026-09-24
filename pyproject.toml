@@ -1,0 +1,68 @@
+[project]
+name = "timedelta"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+    { name = "Stig B. Dørmænen", email = "stigbd@gmail.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "click>=8.5.0",
+]
+
+[project.scripts]
+timedelta = "timedelta:main"
+
+[build-system]
+requires = ["uv_build>=0.12.18,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "deptry>=0.25.1",
+    "pip-audit>=2.10.1",
+    "poethepoet>=0.48.0",
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.16.8",
+    "ty>=0.0.83",
+]
+
+[tool.ruff]
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = ["COM812", "D203", "D213"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101", "PLR2004", "D", "CPY001"]
+
+[tool.deptry]
+known_first_party = ["app"]
+
+[tool.coverage.paths]
+source = ["app"]
+
+[tool.coverage.run]
+branch = true
+omit = ["tests/*"]
+
+[tool.coverage.report]
+fail_under = 100
+show_missing = true
+
+[tool.poe.tasks]
+format = "ruff format ."
+lint = "ruff check . --fix"
+typecheck = "ty check ."
+check-deps = "uv run deptry ."
+audit = "uv run pip-audit ."
+test = "pytest tests -s --cov --cov-report=term-missing --cov-report=html"
+release = [
+    "lint",
+    "typecheck",
+    "test",
+]
