@@ -39,12 +39,15 @@ Alternatively, run it directly from the project without installing, via uv:
 uv run timedelta
 ```
 
-You'll be prompted for a start and end point in time. Alternatively, pass
-them as options:
+You'll be prompted for a start point in time. If `--end` is not given (as
+an option or interactively), the current time is used:
 
 ```console
 uv run timedelta --start 2024-01-01T10:00:00 --end 2024-01-01T12:30:00
 # Time delta: 2 hours, 30 minutes, 0 seconds (after)
+
+uv run timedelta --start 2024-01-01T10:00:00
+# Time delta: <time since start> (after)
 ```
 
 ### Input formats
@@ -58,11 +61,12 @@ uv run timedelta --start 2024-01-01T10:00:00 --end 2024-01-01T12:30:00
 
 Use `-f`/`--format` to control the level of detail:
 
-| Format    | Example output                    |
-| --------- | ---------------------------------- |
-| `seconds` | `9045 seconds`                     |
-| `minutes` | `150 minutes, 45 seconds`          |
-| `hours`   | `2 hours, 30 minutes, 45 seconds` (default) |
+| Format      | Example output                    |
+| ----------- | ---------------------------------- |
+| `seconds`   | `9045 seconds`                     |
+| `minutes`   | `150 minutes, 45 seconds`          |
+| `hours`     | `2 hours, 30 minutes, 45 seconds` (default) |
+| `fractions` | `2.5 hours`                        |
 
 ```console
 uv run timedelta -s 10:00:00 -e 12:30:45 -f seconds

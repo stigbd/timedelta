@@ -1,13 +1,15 @@
 # Copyright (c) 2026 Stig B. Dørmænen
 """Tests for the timedelta CLI."""
 
-from datetime import date, datetime
+from datetime import date, datetime, tzinfo
 
 import click
 import pytest
 from click.testing import CliRunner
 
+import timedelta as timedelta_module
 from timedelta import (
+    _format_fractional_hours,
     _format_timedelta,
     _looks_like_zone_name,
     _parse_datetime,
@@ -124,6 +126,26 @@ class TestFormatTimedelta:
         """It should format a zero delta."""
         assert _format_timedelta(0, "seconds") == "0 seconds"
 
+    def test_fractions_format(self) -> None:
+        """It should format as a fractional number of hours."""
+        assert _format_timedelta(9000, "fractions") == "2.5 hours"
+
+
+class TestFormatFractionalHours:
+    """Tests for _format_fractional_hours."""
+
+    def test_fraction(self) -> None:
+        """It should format a fractional value with trailing zeros stripped."""
+        assert _format_fractional_hours(9000) == "2.5 hours"
+
+    def test_whole_hour(self) -> None:
+        """It should format a whole number of hours without a decimal point."""
+        assert _format_fractional_hours(7200) == "2 hours"
+
+    def test_singular_hour(self) -> None:
+        """It should use the singular unit for exactly one hour."""
+        assert _format_fractional_hours(3600) == "1 hour"
+
 
 class TestMain:
     """Tests for the main CLI command."""
@@ -170,12 +192,49 @@ class TestMain:
         assert result.exit_code == 0
         assert result.output.strip() == "Time delta: 2 minutes, 5 seconds (after)"
 
-    def test_prompts_when_options_missing(self) -> None:
-        """It should prompt for start and end when not given as options."""
+    def test_prompts_for_start_when_option_missing(self) -> None:
+        """It should prompt for start when not given as an option."""
+        runner = CliRunner()
+        result = runner.invoke(main, ["-e", "10:05:30"], input="10:00:00\n")
+        assert result.exit_code == 0
+        assert "Time delta: 0 hours, 5 minutes, 30 seconds (after)" in result.output
+
+    def test_prompts_for_both_start_and_end_when_omitted(self) -> None:
+        """It should prompt for both start and end when neither is given."""
         runner = CliRunner()
         result = runner.invoke(main, input="10:00:00\n10:05:30\n")
         assert result.exit_code == 0
         assert "Time delta: 0 hours, 5 minutes, 30 seconds (after)" in result.output
+
+    def test_end_defaults_to_current_time_when_omitted(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """It should use the current time when --end is not given."""
+
+        class FrozenDatetime(datetime):
+            """A datetime subclass with a fixed `now()`."""
+
+            @classmethod
+            def now(cls, tz: tzinfo | None = None) -> FrozenDatetime:  # noqa: ARG003
+                return cls(2024, 1, 1, 12, 30, 0)
+
+        monkeypatch.setattr(timedelta_module, "datetime", FrozenDatetime)
+        runner = CliRunner()
+        result = runner.invoke(main, ["-s", "2024-01-01T10:00:00"], input="\n")
+        assert result.exit_code == 0
+        expected = "Time delta: 2 hours, 30 minutes, 0 seconds (after)"
+        assert result.output.strip().endswith(expected)
+
+    def test_fractions_format_option(self) -> None:
+        """It should honor the fractions output format."""
+        runner = CliRunner()
+        result = runner.invoke(
+            main,
+            ["-s", "10:00:00", "-e", "12:30:00", "-f", "fractions"],
+        )
+        assert result.exit_code == 0
+        assert result.output.strip() == "Time delta: 2.5 hours (after)"
 
     def test_invalid_start_value_errors(self) -> None:
         """It should exit with a usage error for an invalid start value."""

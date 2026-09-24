@@ -63,8 +63,19 @@ def _pluralize(value: int, unit: str) -> str:
     return f"{value} {unit}{'s' if value != 1 else ''}"
 
 
+def _format_fractional_hours(seconds: float) -> str:
+    """Format a number of seconds as a fractional number of hours."""
+    hours = seconds / 3600
+    formatted_value = f"{hours:.2f}".rstrip("0").rstrip(".")
+    unit = "hour" if formatted_value == "1" else "hours"
+    return f"{formatted_value} {unit}"
+
+
 def _format_timedelta(seconds: float, output_format: str = "hours") -> str:
     """Format a timedelta in seconds as a human-readable string."""
+    if output_format == "fractions":
+        return _format_fractional_hours(seconds)
+
     seconds = int(seconds)
 
     if output_format == "seconds":
@@ -99,31 +110,37 @@ def _format_timedelta(seconds: float, output_format: str = "hours") -> str:
 @click.option(
     "--end",
     "-e",
-    prompt="End point in time (e.g. 2024-01-01T12:30:00 or 12:30:00)",
+    default="",
+    show_default=False,
+    prompt="End point in time (leave blank for current time)",
     help=(
         "End point in time (full datetime or just hh:mm:ss for today). "
         "Specify a timezone with a trailing Z (UTC), a numeric offset "
         "(e.g. +02:00), or a space-separated IANA name (e.g. "
         "'12:30:00 Europe/Oslo') -- only one at a time; defaults to "
-        "naive/local time if omitted."
+        "naive/local time if omitted. Leave blank to use the current time."
     ),
 )
 @click.option(
     "--format",
     "-f",
     "output_format",
-    type=click.Choice(["seconds", "minutes", "hours"]),
+    type=click.Choice(["seconds", "minutes", "hours", "fractions"]),
     default="hours",
     show_default=True,
-    help="Output format: seconds; minutes and seconds; or hours, minutes and seconds.",
+    help=(
+        "Output format: seconds; minutes and seconds; hours, minutes and "
+        "seconds; or a fractional number of hours (e.g. '2.5 hours')."
+    ),
 )
 def main(start: str, end: str, output_format: str) -> None:
     """Compute the difference between two points in time."""
     start_dt = _parse_datetime(start)
-    end_dt = _parse_datetime(end)
+    end_dt = _parse_datetime(end) if end.strip() else datetime.now()  # noqa: DTZ005
 
     delta = end_dt - start_dt
     direction = "before" if delta.total_seconds() < 0 else "after"
     formatted = _format_timedelta(abs(delta.total_seconds()), output_format)
 
     click.echo(f"Time delta: {formatted} ({direction})")
+
