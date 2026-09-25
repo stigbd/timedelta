@@ -1,6 +1,6 @@
 [project]
 name = "timedelta"
-version = "0.1.0"
+version = "1.0.0"
 description = "Add your description here"
 readme = "README.md"
 license = "MIT"
@@ -64,6 +64,7 @@ typecheck = "ty check ."
 check-deps = "uv run deptry ."
 audit = "uv run pip-audit ."
 test = "pytest tests -s --cov --cov-report=term-missing --cov-report=html"
+build = "uv build"
 release = [
     "lint",
     "typecheck",

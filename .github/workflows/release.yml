@@ -22,3 +22,12 @@ jobs:
 
       - name: Run release pipeline
         run: uv run poe release
+
+      - name: Build release artifact
+        run: uv run poe build
+
+      - name: Upload release artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: timedelta-dist
+          path: dist/

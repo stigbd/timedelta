@@ -107,9 +107,33 @@ uv sync
 | `uv run poe check-deps` | Check for unused/missing deps with deptry |
 | `uv run poe audit`    | Audit dependencies for vulnerabilities    |
 | `uv run poe release`  | Run lint, typecheck and test in sequence  |
+| `uv run poe build`    | Build the sdist and wheel into `dist/`    |
 
 Tests live in `tests/` and require 100% coverage (enforced via
 `pyproject.toml`).
+
+### Releasing to PyPI
+
+Releases are published automatically by
+[`.github/workflows/publish.yml`](.github/workflows/publish.yml) whenever a
+tag matching `v*.*.*` is pushed:
+
+1. Bump the version: `uv version <new-version>` (or `uv version --bump patch`
+   / `minor` / `major`), then commit the change to `pyproject.toml`.
+2. Tag the release commit and push the tag, e.g.:
+
+   ```console
+   git tag v0.2.0
+   git push origin v0.2.0
+   ```
+
+3. The workflow validates the tag matches the project version, runs the
+   release pipeline, builds the sdist/wheel, publishes them to PyPI via
+   [Trusted Publishing](https://docs.pypi.org/trusted-publishers/) (no API
+   token required), and attaches them to a GitHub Release.
+
+PyPI's Trusted Publishing must be configured once for this repository under
+the `pypi` GitHub environment before the first release.
 
 ## License
 
