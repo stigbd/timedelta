@@ -14,10 +14,19 @@ from timedelta import (
     _looks_like_zone_name,
     _parse_datetime,
     _pluralize,
+    _resolve_datetime,
     main,
 )
 
 EXIT_CODE_USAGE_ERROR = 2
+
+
+class FrozenDatetime(datetime):
+    """A datetime subclass with a fixed `now()` for deterministic tests."""
+
+    @classmethod
+    def now(cls, tz: tzinfo | None = None) -> FrozenDatetime:  # noqa: ARG003
+        return cls(2024, 1, 1, 12, 30, 0)
 
 
 class TestLooksLikeZoneName:
@@ -88,6 +97,30 @@ class TestParseDatetime:
         """It should raise BadParameter for values that are not parseable."""
         with pytest.raises(click.BadParameter, match="is not a valid ISO 8601"):
             _parse_datetime("notadate")
+
+
+class TestResolveDatetime:
+    """Tests for _resolve_datetime."""
+
+    def test_blank_resolves_to_now(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """It should resolve a blank value to the current time."""
+        monkeypatch.setattr(timedelta_module, "datetime", FrozenDatetime)
+        assert _resolve_datetime("") == FrozenDatetime(2024, 1, 1, 12, 30, 0)
+
+    @pytest.mark.parametrize("value", ["now", "NOW", " Now "])
+    def test_now_literal_resolves_to_now(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        value: str,
+    ) -> None:
+        """It should resolve the literal 'now' (any case) to the current time."""
+        monkeypatch.setattr(timedelta_module, "datetime", FrozenDatetime)
+        assert _resolve_datetime(value) == FrozenDatetime(2024, 1, 1, 12, 30, 0)
+
+    def test_other_values_are_parsed(self) -> None:
+        """It should parse non-'now' values normally."""
+        expected = datetime(2024, 1, 1, 10, 0, 0)  # noqa: DTZ001
+        assert _resolve_datetime("2024-01-01T10:00:00") == expected
 
 
 class TestPluralize:
@@ -211,20 +244,30 @@ class TestMain:
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         """It should use the current time when --end is not given."""
-
-        class FrozenDatetime(datetime):
-            """A datetime subclass with a fixed `now()`."""
-
-            @classmethod
-            def now(cls, tz: tzinfo | None = None) -> FrozenDatetime:  # noqa: ARG003
-                return cls(2024, 1, 1, 12, 30, 0)
-
         monkeypatch.setattr(timedelta_module, "datetime", FrozenDatetime)
         runner = CliRunner()
         result = runner.invoke(main, ["-s", "2024-01-01T10:00:00"], input="\n")
         assert result.exit_code == 0
         expected = "Time delta: 2 hours, 30 minutes, 0 seconds (after)"
         assert result.output.strip().endswith(expected)
+
+    def test_end_now_literal(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """It should treat -e now as the current time."""
+        monkeypatch.setattr(timedelta_module, "datetime", FrozenDatetime)
+        runner = CliRunner()
+        result = runner.invoke(main, ["-s", "2024-01-01T10:00:00", "-e", "now"])
+        assert result.exit_code == 0
+        expected = "Time delta: 2 hours, 30 minutes, 0 seconds (after)"
+        assert result.output.strip() == expected
+
+    def test_start_now_literal(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """It should treat -s now as the current time."""
+        monkeypatch.setattr(timedelta_module, "datetime", FrozenDatetime)
+        runner = CliRunner()
+        result = runner.invoke(main, ["-s", "now", "-e", "2024-01-01T15:00:00"])
+        assert result.exit_code == 0
+        expected = "Time delta: 2 hours, 30 minutes, 0 seconds (after)"
+        assert result.output.strip() == expected
 
     def test_fractions_format_option(self) -> None:
         """It should honor the fractions output format."""

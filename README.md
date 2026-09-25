@@ -39,8 +39,9 @@ Alternatively, run it directly from the project without installing, via uv:
 uv run timedelta
 ```
 
-You'll be prompted for a start point in time. If `--end` is not given (as
-an option or interactively), the current time is used:
+You'll be prompted for a start point in time. If `--end` is not given (or
+you leave it blank at the prompt), the current time is used. You can also
+use the literal `now` for either `--start` or `--end`:
 
 ```console
 uv run timedelta --start 2024-01-01T10:00:00 --end 2024-01-01T12:30:00
@@ -48,12 +49,19 @@ uv run timedelta --start 2024-01-01T10:00:00 --end 2024-01-01T12:30:00
 
 uv run timedelta --start 2024-01-01T10:00:00
 # Time delta: <time since start> (after)
+
+uv run timedelta --start 08:49 --end now
+# Time delta: <time since 08:49> (after)
+
+uv run timedelta --start now --end 20:00:00
+# Time delta: <time until 20:00> (after)
 ```
 
 ### Input formats
 
 - Full ISO 8601 datetime: `2024-01-01T10:00:00`
 - Time only (defaults to today's date): `10:00:00`
+- The literal `now` (case-insensitive) for the current time
 - Timezone via trailing `Z` (UTC), a numeric offset (`+02:00`), or a
   space-separated IANA name (`10:00:00 Europe/Oslo`) -- only one at a time
 

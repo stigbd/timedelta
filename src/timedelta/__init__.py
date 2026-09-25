@@ -58,6 +58,13 @@ def _parse_datetime(value: str) -> datetime:
     return parsed
 
 
+def _resolve_datetime(value: str) -> datetime:
+    """Resolve a value to a datetime, treating blank or "now" as the current time."""
+    if not value.strip() or value.strip().lower() == "now":
+        return datetime.now()  # noqa: DTZ005
+    return _parse_datetime(value)
+
+
 def _pluralize(value: int, unit: str) -> str:
     """Return a string with the value and unit, pluralized if necessary."""
     return f"{value} {unit}{'s' if value != 1 else ''}"
@@ -98,13 +105,13 @@ def _format_timedelta(seconds: float, output_format: str = "hours") -> str:
 @click.option(
     "--start",
     "-s",
-    prompt="Start point in time (e.g. 2024-01-01T10:00:00 or 10:00:00)",
+    prompt="Start point in time (e.g. 2024-01-01T10:00:00, 10:00:00 or now)",
     help=(
         "Start point in time (full datetime or just hh:mm:ss for today). "
-        "Specify a timezone with a trailing Z (UTC), a numeric offset "
-        "(e.g. +02:00), or a space-separated IANA name (e.g. "
-        "'10:00:00 Europe/Oslo') -- only one at a time; defaults to "
-        "naive/local time if omitted."
+        "Use 'now' for the current time. Specify a timezone with a "
+        "trailing Z (UTC), a numeric offset (e.g. +02:00), or a "
+        "space-separated IANA name (e.g. '10:00:00 Europe/Oslo') -- only "
+        "one at a time; defaults to naive/local time if omitted."
     ),
 )
 @click.option(
@@ -112,13 +119,14 @@ def _format_timedelta(seconds: float, output_format: str = "hours") -> str:
     "-e",
     default="",
     show_default=False,
-    prompt="End point in time (leave blank for current time)",
+    prompt="End point in time (leave blank or type 'now' for current time)",
     help=(
         "End point in time (full datetime or just hh:mm:ss for today). "
-        "Specify a timezone with a trailing Z (UTC), a numeric offset "
-        "(e.g. +02:00), or a space-separated IANA name (e.g. "
+        "Leave blank or use 'now' for the current time. Specify a "
+        "timezone with a trailing Z (UTC), a numeric offset (e.g. "
+        "+02:00), or a space-separated IANA name (e.g. "
         "'12:30:00 Europe/Oslo') -- only one at a time; defaults to "
-        "naive/local time if omitted. Leave blank to use the current time."
+        "naive/local time if omitted."
     ),
 )
 @click.option(
@@ -135,8 +143,8 @@ def _format_timedelta(seconds: float, output_format: str = "hours") -> str:
 )
 def main(start: str, end: str, output_format: str) -> None:
     """Compute the difference between two points in time."""
-    start_dt = _parse_datetime(start)
-    end_dt = _parse_datetime(end) if end.strip() else datetime.now()  # noqa: DTZ005
+    start_dt = _resolve_datetime(start)
+    end_dt = _resolve_datetime(end)
 
     delta = end_dt - start_dt
     direction = "before" if delta.total_seconds() < 0 else "after"
