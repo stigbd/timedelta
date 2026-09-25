@@ -1,5 +1,7 @@
 # timedelta
 
+[![Release pipeline](https://github.com/stigbd/timedelta/actions/workflows/release.yml/badge.svg)](https://github.com/stigbd/timedelta/actions/workflows/release.yml)
+
 A minimal CLI for computing the time delta between two points in time, built
 with [Click](https://click.palletsprojects.com/).
 
