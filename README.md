@@ -39,9 +39,9 @@ Alternatively, run it directly from the project without installing, via uv:
 uv run timedelta
 ```
 
-You'll be prompted for a start point in time. If `--end` is not given (or
-you leave it blank at the prompt), the current time is used. You can also
-use the literal `now` for either `--start` or `--end`:
+You'll be prompted for `--start` and `--end` if not given as options. If
+either is omitted, or left blank at its prompt, the current time is used.
+You can also use the literal `now` for either `--start` or `--end`:
 
 ```console
 uv run timedelta --start 2024-01-01T10:00:00 --end 2024-01-01T12:30:00
@@ -80,7 +80,8 @@ Use `-f`/`--format` to control the level of detail:
 uv run timedelta -s 10:00:00 -e 12:30:45 -f seconds
 ```
 
-Run `uv run timedelta --help` for the full option reference.
+Run `uv run timedelta --help` for the full option reference, or
+`uv run timedelta --version` to print the installed version.
 
 ## Development
 

@@ -183,6 +183,13 @@ class TestFormatFractionalHours:
 class TestMain:
     """Tests for the main CLI command."""
 
+    def test_version_option(self) -> None:
+        """It should print the package version and exit."""
+        runner = CliRunner()
+        result = runner.invoke(main, ["--version"], prog_name="timedelta")
+        assert result.exit_code == 0
+        assert "timedelta, version" in result.output
+
     def test_options_after_direction(self) -> None:
         """It should report 'after' when end is later than start."""
         runner = CliRunner()
@@ -247,6 +254,18 @@ class TestMain:
         monkeypatch.setattr(timedelta_module, "datetime", FrozenDatetime)
         runner = CliRunner()
         result = runner.invoke(main, ["-s", "2024-01-01T10:00:00"], input="\n")
+        assert result.exit_code == 0
+        expected = "Time delta: 2 hours, 30 minutes, 0 seconds (after)"
+        assert result.output.strip().endswith(expected)
+
+    def test_start_defaults_to_current_time_when_omitted(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """It should use the current time when --start is left blank."""
+        monkeypatch.setattr(timedelta_module, "datetime", FrozenDatetime)
+        runner = CliRunner()
+        result = runner.invoke(main, ["-e", "2024-01-01T15:00:00"], input="\n")
         assert result.exit_code == 0
         expected = "Time delta: 2 hours, 30 minutes, 0 seconds (after)"
         assert result.output.strip().endswith(expected)

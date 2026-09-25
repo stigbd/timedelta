@@ -102,16 +102,20 @@ def _format_timedelta(seconds: float, output_format: str = "hours") -> str:
 
 
 @click.command()
+@click.version_option(package_name="timedelta")
 @click.option(
     "--start",
     "-s",
-    prompt="Start point in time (e.g. 2024-01-01T10:00:00, 10:00:00 or now)",
+    default="",
+    show_default=False,
+    prompt="Start point in time (leave blank or type 'now' for current time)",
     help=(
         "Start point in time (full datetime or just hh:mm:ss for today). "
-        "Use 'now' for the current time. Specify a timezone with a "
-        "trailing Z (UTC), a numeric offset (e.g. +02:00), or a "
-        "space-separated IANA name (e.g. '10:00:00 Europe/Oslo') -- only "
-        "one at a time; defaults to naive/local time if omitted."
+        "Leave blank or use 'now' for the current time. Specify a "
+        "timezone with a trailing Z (UTC), a numeric offset (e.g. "
+        "+02:00), or a space-separated IANA name (e.g. "
+        "'10:00:00 Europe/Oslo') -- only one at a time; defaults to "
+        "naive/local time if omitted."
     ),
 )
 @click.option(
