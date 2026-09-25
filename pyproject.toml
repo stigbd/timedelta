@@ -1,6 +1,6 @@
 [project]
 name = "timedelta"
-version = "1.0.0"
+version = "1.1.0"
 description = "Add your description here"
 readme = "README.md"
 license = "MIT"
@@ -65,6 +65,8 @@ check-deps = "uv run deptry ."
 audit = "uv run pip-audit ."
 test = "pytest tests -s --cov --cov-report=term-missing --cov-report=html"
 build = "uv build"
+man-preview = "man ./man/timedelta.1"
+man-install = "install -Dm644 man/timedelta.1 -t ${HOME}/.local/share/man/man1"
 release = [
     "lint",
     "typecheck",

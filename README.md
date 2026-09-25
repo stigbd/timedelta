@@ -33,6 +33,24 @@ Once installed, the `timedelta` command is available on your `PATH`:
 timedelta --help
 ```
 
+### Man page
+
+A man page is included at [`man/timedelta.1`](man/timedelta.1). To install it
+for your user so that `man timedelta` works, run:
+
+```console
+install -Dm644 man/timedelta.1 -t ~/.local/share/man/man1
+```
+
+or, from a checkout of this repository:
+
+```console
+uv run poe man-install
+```
+
+To install it system-wide instead (requires root), use
+`/usr/local/share/man/man1` as the target and run `mandb` afterwards.
+
 ## Usage
 
 Alternatively, run it directly from the project without installing, via uv:

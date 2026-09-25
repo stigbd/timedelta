@@ -1,0 +1,81 @@
+.TH TIMEDELTA 1 "2026-09-25" "timedelta 1.0.0" "User Commands"
+.SH NAME
+timedelta \- compute the difference between two points in time
+.SH SYNOPSIS
+.B timedelta
+[\fB\-\-version\fR]
+[\fB\-s\fR, \fB\-\-start\fR \fITEXT\fR]
+[\fB\-e\fR, \fB\-\-end\fR \fITEXT\fR]
+[\fB\-f\fR, \fB\-\-format\fR \fIFORMAT\fR]
+.SH DESCRIPTION
+.B timedelta
+is a minimal command-line tool for computing the elapsed time between two
+points in time. If
+.B \-\-start
+or
+.B \-\-end
+are not given, you will be prompted for them interactively.
+.SH OPTIONS
+.TP
+\fB\-s\fR, \fB\-\-start\fR \fITEXT\fR
+Start point in time. Accepts a full ISO 8601 datetime (e.g.
+.IR 2024\-01\-01T10:00:00 ),
+just a time of day for today (e.g.
+.IR 10:00:00 ),
+or the literal
+.I now
+for the current time. Leaving this blank when prompted also defaults to
+the current time.
+.IP
+A timezone may be attached using a trailing
+.I Z
+for UTC, a numeric offset (e.g.
+.IR +02:00 ),
+or a space-separated IANA timezone name (e.g.
+.IR "10:00:00 Europe/Oslo" ).
+Only one of these may be used at a time; if omitted, naive/local time is
+assumed.
+.TP
+\fB\-e\fR, \fB\-\-end\fR \fITEXT\fR
+End point in time. Accepts the same formats as
+.BR \-\-start .
+.TP
+\fB\-f\fR, \fB\-\-format\fR \fI{seconds,minutes,hours,fractions}\fR
+Controls the level of detail in the output:
+.RS
+.IP \(bu 2
+.B seconds
+\-\- total seconds, e.g. "9045 seconds"
+.IP \(bu 2
+.B minutes
+\-\- minutes and seconds, e.g. "150 minutes, 45 seconds"
+.IP \(bu 2
+.B hours
+\-\- hours, minutes and seconds (default), e.g. "2 hours, 30 minutes, 45 seconds"
+.IP \(bu 2
+.B fractions
+\-\- a fractional number of hours, e.g. "2.5 hours"
+.RE
+.TP
+\fB\-\-version\fR
+Show the installed version and exit.
+.TP
+\fB\-\-help\fR
+Show a summary of options and exit.
+.SH EXAMPLES
+.TP
+Compute the delta between two full datetimes:
+.B timedelta \-\-start 2024\-01\-01T10:00:00 \-\-end 2024\-01\-01T12:30:00
+.TP
+Compute the time since a given time today:
+.B timedelta \-s 08:49 \-e now
+.TP
+Compute the time remaining until a given time today:
+.B timedelta \-s now \-e 20:00:00
+.TP
+Report the delta as a fractional number of hours:
+.B timedelta \-s 10:00:00 \-e 12:30:00 \-f fractions
+.SH AUTHOR
+Stig B. Dørmænen <stigbd@gmail.com>
+.SH SEE ALSO
+Full documentation and source: <https://github.com/stigbd/timedelta>
