@@ -51,6 +51,9 @@ uv run poe man-install
 To install it system-wide instead (requires root), use
 `/usr/local/share/man/man1` as the target and run `mandb` afterwards.
 
+See [`man/README.md`](man/README.md) for how to update the man page's
+content and keep it in sync with the CLI.
+
 ## Usage
 
 Alternatively, run it directly from the project without installing, via uv:
