@@ -96,12 +96,30 @@ Use `-f`/`--format` to control the level of detail:
 | ----------- | ---------------------------------- |
 | `seconds`   | `9045 seconds`                     |
 | `minutes`   | `150 minutes, 45 seconds`          |
-| `hours`     | `2 hours, 30 minutes, 45 seconds` (default) |
+| `hours`     | `2 hours, 30 minutes, 45 seconds` |
 | `fractions` | `2.5 hours`                        |
 
 ```console
 uv run timedelta -s 10:00:00 -e 12:30:45 -f seconds
 ```
+
+If `-f`/`--format` is omitted, and both `--start` and `--end` resolve to a
+known date (an explicit date, or blank/`now`), the output automatically
+switches to a calendar breakdown -- years, months, days, and progressively
+hours, minutes and seconds, depending on the finer of the two inputs'
+granularity:
+
+```console
+uv run timedelta -s 2024-01-01 -e 2024-03-05
+# Time delta: 0 years, 2 months, 4 days (after)
+
+uv run timedelta -s 2024-01-01T10:00:00 -e 2024-01-03T12:30:45
+# Time delta: 0 years, 0 months, 2 days, 2 hours, 30 minutes, 45 seconds (after)
+```
+
+Only a bare time of day on either side (e.g. `10:00:00`, with no date)
+falls back to the `hours` default, since it doesn't carry date
+information.
 
 Run `uv run timedelta --help` for the full option reference, or
 `uv run timedelta --version` to print the installed version.

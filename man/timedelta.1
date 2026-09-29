@@ -51,11 +51,27 @@ Controls the level of detail in the output:
 \-\- minutes and seconds, e.g. "150 minutes, 45 seconds"
 .IP \(bu 2
 .B hours
-\-\- hours, minutes and seconds (default), e.g. "2 hours, 30 minutes, 45 seconds"
+\-\- hours, minutes and seconds, e.g. "2 hours, 30 minutes, 45 seconds"
 .IP \(bu 2
 .B fractions
 \-\- a fractional number of hours, e.g. "2.5 hours"
 .RE
+.IP
+If omitted, and both
+.B \-\-start
+and
+.B \-\-end
+resolve to a known date (an explicit date, or blank/
+.IR now ),
+a calendar breakdown is used instead: years, months, days, and
+progressively hours, minutes and seconds, matching the finer of the two
+inputs' granularity, e.g. "0 years, 2 months, 4 days" for two dates, or
+"1 year, 0 months, 3 days, 2 hours, 30 minutes, 45 seconds" for two full
+datetimes. Only a bare time of day (e.g.
+.IR 10:00:00 ,
+with no date) on either side falls back to the default of
+.BR hours ,
+since it doesn't carry date information.
 .TP
 \fB\-\-version\fR
 Show the installed version and exit.
@@ -75,6 +91,9 @@ Compute the time remaining until a given time today:
 .TP
 Report the delta as a fractional number of hours:
 .B timedelta \-s 10:00:00 \-e 12:30:00 \-f fractions
+.TP
+Compute a calendar breakdown automatically from two full dates:
+.B timedelta \-s 2024\-01\-01 \-e 2024\-03\-05
 .SH AUTHOR
 Stig B. Dørmænen <stigbd@gmail.com>
 .SH SEE ALSO
